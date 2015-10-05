@@ -5,5 +5,12 @@ namespace Iivannov\Larasquare\Filter;
 
 interface FilterContract
 {
-    public function parse($query);
+
+    /**
+     * Generate, transform or filter your search query
+     *
+     * @param $query
+     * @return array
+     */
+    public function parse($query =[]);
 }

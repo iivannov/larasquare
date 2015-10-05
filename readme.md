@@ -5,7 +5,8 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 
-Simple and extensible Foursquare API PHP Client with Laravel Support based on Guzzle 6
+Simple and extensible Foursquare API PHP Client with Laravel Facade and ServiceProvider based on Guzzle 6
+Currently it supports only userless endpoint requests.
 
 
 ## Install
@@ -17,8 +18,6 @@ $ composer require iivannov/larasquare
 ```
 
 
-
-
 ## Usage with Laravel
 
 To use the Laravel Facade you need to add the ServiceProvider and Facade classes in your `config\app.php`
@@ -27,7 +26,6 @@ To use the Laravel Facade you need to add the ServiceProvider and Facade classes
 
 'providers' => [
     ...
-
     Iivannov\Larasquare\Provider\LarasquareServiceProvider::class,
 ];
 
@@ -37,7 +35,7 @@ To use the Laravel Facade you need to add the ServiceProvider and Facade classes
 ];
 ```
 
-You need to add your Foursquare client ID and secret in `config\app.php`
+You need to add your Foursquare client ID and secret in `config\services.php`
 
 ``` php
 'foursquare' => [
@@ -50,8 +48,7 @@ After this you can directly use the Laravel Facade
 
 
 ``` php
-
-    $venues = Larasquare::venues($searchQuery);
+$venues = Larasquare::venues($searchQuery);
 
 ```
 
@@ -59,17 +56,83 @@ After this you can directly use the Laravel Facade
 ## Standard Usage
 
 ``` php
-    $config = [
-        clientId = YOUR_FOURSQUARE_CLIENT_ID,
-        clientSecretT = YOUR_FOURSQUARE_CLIENT_SECRET,
-        apiUrl = FOURSQUARE_API_URL, //optional
-        version = SUPPORTED_VERSION, //optional, format: YYYYMMDD
+$config = [
+    clientId = YOUR_FOURSQUARE_CLIENT_ID,
+    clientSecretT = YOUR_FOURSQUARE_CLIENT_SECRET,
+    apiUrl = FOURSQUARE_API_URL, //optional
+    version = SUPPORTED_VERSION, //optional, format: YYYYMMDD
+];
+
+$foursquare = new Foursquare($config);
+
+$venues = $foursquare->venues($searchQuery);
+```
+
+## Query filters
+
+If you need to generate, filter or transform your search query you can extract all the logic in a separate class that implements the `Iivannov\Larasquare\Filter\FilterContract`
+and then just inject it with `setFilter()` method.
+
+```php
+$venues = Larasquare::setFilter(new MyFilter())->venues();
+```
+
+Put your filter logic in the parse() method. It will automatically receive the query passed in the search methods.
+You can overwrite values, generate values from your custom array or whatever you need. The returned array will be sent with the Foursquare request.
+```php
+
+/**
+* Generate, transform or filter your search query
+*
+* @param $query
+* @return array
+*/
+public function parse($query = [])
+{
+    return [
+        'll' => $query['location']['lat'] . ',' . $query['location']['lon'],
+        'query' => $query['searchTerm'],
+        'near' => $_GET['nearLocation'],
+        'radius' => 200
     ];
+}
+```
 
-    $foursquare = new Foursquare($config);
+Methods
+--------
+** Endpoints not covered by this library **
+You can use the `request` method to query a Foursquare endpoint.
 
-    $venues = Larasquare::venues($searchQuery);
+```php
+// get venue photos
+$response = Larasquare::request("venues/$venueId/photos")
 
+// get details about a tip,
+$response = Larasquare::request("tips/$tipId")
+```
+
+
+** Searching Venues **
+
+```php
+//Laravel
+$venues = Larasquare::venues($query);
+```
+
+** Get a single venue **
+
+```php
+$venues = Larasquare::venue($venueId);
+```
+
+** Other venues methods **
+
+```php
+// get suggestion @see https://developer.foursquare.com/docs/venues/suggestcompletion
+$venues = Larasquare::suggest($searchQuery);
+
+// get trending @see https://developer.foursquare.com/docs/venues/trending
+$venues = Larasquare::trending($searchQuery);
 ```
 
 
