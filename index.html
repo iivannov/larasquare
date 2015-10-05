@@ -35,7 +35,8 @@
 <a href="license.md"><img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="Software License"></a>
 <a href="https://packagist.org/packages/iivannov/larasquare"><img src="https://img.shields.io/packagist/dt/iivannov/larasquare.svg?style=flat-square" alt="Total Downloads"></a></p>
 
-<p>Simple and extensible Foursquare API PHP Client with Laravel Support based on Guzzle 6</p>
+<p>Simple and extensible Foursquare API PHP Client with Laravel Facade and ServiceProvider based on Guzzle 6
+Currently it supports only userless endpoint requests.</p>
 
 <h2>
 <a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
@@ -52,7 +53,6 @@
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"></span>
 <span class="pl-s1"><span class="pl-s"><span class="pl-pds">'</span>providers<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
 <span class="pl-s1">    <span class="pl-k">...</span></span>
-<span class="pl-s1"></span>
 <span class="pl-s1">    <span class="pl-c1">Iivannov\Larasquare\Provider\</span><span class="pl-c1">LarasquareServiceProvider</span><span class="pl-k">::</span><span class="pl-c1">class</span>,</span>
 <span class="pl-s1">];</span>
 <span class="pl-s1"></span>
@@ -61,7 +61,7 @@
 <span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>Larasquare<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">Iivannov\Larasquare\Facade\</span><span class="pl-c1">Larasquare</span><span class="pl-k">::</span><span class="pl-c1">class</span></span>
 <span class="pl-s1">];</span></pre></div>
 
-<p>You need to add your Foursquare client ID and secret in <code>config\app.php</code></p>
+<p>You need to add your Foursquare client ID and secret in <code>config\services.php</code></p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-s"><span class="pl-pds">'</span>foursquare<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
 <span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>clientId<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">YOUR_FOURSQUARE_CLIENT_ID</span>,</span>
@@ -70,24 +70,79 @@
 
 <p>After this you can directly use the Laravel Facade</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>venues(<span class="pl-smi">$searchQuery</span>);</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>venues(<span class="pl-smi">$searchQuery</span>);</span>
 <span class="pl-s1"></span></pre></div>
 
 <h2>
 <a id="standard-usage" class="anchor" href="#standard-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard Usage</h2>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1">    <span class="pl-smi">$config</span> <span class="pl-k">=</span> [</span>
-<span class="pl-s1">        <span class="pl-c1">clientId</span> <span class="pl-k">=</span> <span class="pl-c1">YOUR_FOURSQUARE_CLIENT_ID</span>,</span>
-<span class="pl-s1">        <span class="pl-c1">clientSecretT</span> <span class="pl-k">=</span> <span class="pl-c1">YOUR_FOURSQUARE_CLIENT_SECRET</span>,</span>
-<span class="pl-s1">        <span class="pl-c1">apiUrl</span> <span class="pl-k">=</span> <span class="pl-c1">FOURSQUARE_API_URL</span>, <span class="pl-c">//optional</span></span>
-<span class="pl-s1">        <span class="pl-c1">version</span> <span class="pl-k">=</span> <span class="pl-c1">SUPPORTED_VERSION</span>, <span class="pl-c">//optional, format: YYYYMMDD</span></span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$config</span> <span class="pl-k">=</span> [</span>
+<span class="pl-s1">    <span class="pl-c1">clientId</span> <span class="pl-k">=</span> <span class="pl-c1">YOUR_FOURSQUARE_CLIENT_ID</span>,</span>
+<span class="pl-s1">    <span class="pl-c1">clientSecretT</span> <span class="pl-k">=</span> <span class="pl-c1">YOUR_FOURSQUARE_CLIENT_SECRET</span>,</span>
+<span class="pl-s1">    <span class="pl-c1">apiUrl</span> <span class="pl-k">=</span> <span class="pl-c1">FOURSQUARE_API_URL</span>, <span class="pl-c">//optional</span></span>
+<span class="pl-s1">    <span class="pl-c1">version</span> <span class="pl-k">=</span> <span class="pl-c1">SUPPORTED_VERSION</span>, <span class="pl-c">//optional, format: YYYYMMDD</span></span>
+<span class="pl-s1">];</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$foursquare</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Foursquare</span>(<span class="pl-smi">$config</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-smi">$foursquare</span><span class="pl-k">-&gt;</span>venues(<span class="pl-smi">$searchQuery</span>);</span></pre></div>
+
+<h2>
+<a id="query-filters" class="anchor" href="#query-filters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Query filters</h2>
+
+<p>If you need to generate, filter or transform your search query you can extract all the logic in a separate class that implements the <code>Iivannov\Larasquare\Filter\FilterContract</code>
+and then just inject it with <code>setFilter()</code> method.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>setFilter(<span class="pl-k">new</span> <span class="pl-c1">MyFilter</span>())<span class="pl-k">-&gt;</span>venues();</span></pre></div>
+
+<p>Put your filter logic in the parse() method. It will automatically receive the query passed in the search methods.
+You can overwrite values, generate values from your custom array or whatever you need. The returned array will be sent with the Foursquare request.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">/**</span></span>
+<span class="pl-s1"><span class="pl-c">* Generate, transform or filter your search query</span></span>
+<span class="pl-s1"><span class="pl-c">*</span></span>
+<span class="pl-s1"><span class="pl-c">* <span class="pl-k">@param</span> $query</span></span>
+<span class="pl-s1"><span class="pl-c">* <span class="pl-k">@return</span> array</span></span>
+<span class="pl-s1"><span class="pl-c">*/</span></span>
+<span class="pl-s1"><span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">parse</span>(<span class="pl-smi">$query</span> <span class="pl-k">=</span> [])</span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">return</span> [</span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>ll<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$query</span>[<span class="pl-s"><span class="pl-pds">'</span>location<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>lat<span class="pl-pds">'</span></span>] <span class="pl-k">.</span> <span class="pl-s"><span class="pl-pds">'</span>,<span class="pl-pds">'</span></span> <span class="pl-k">.</span> <span class="pl-smi">$query</span>[<span class="pl-s"><span class="pl-pds">'</span>location<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>lon<span class="pl-pds">'</span></span>],</span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>query<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$query</span>[<span class="pl-s"><span class="pl-pds">'</span>searchTerm<span class="pl-pds">'</span></span>],</span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>near<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$_GET</span>[<span class="pl-s"><span class="pl-pds">'</span>nearLocation<span class="pl-pds">'</span></span>],</span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>radius<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">200</span></span>
 <span class="pl-s1">    ];</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h2>
+<a id="methods" class="anchor" href="#methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Methods</h2>
+
+<p><strong>Endpoints not covered by this library</strong>
+You can use the <code>request</code> method to query a Foursquare endpoint.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c">// get venue photos</span></span>
+<span class="pl-s1"><span class="pl-smi">$response</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>request(<span class="pl-s"><span class="pl-pds">"</span>venues/<span class="pl-smi">$venueId</span>/photos<span class="pl-pds">"</span></span>)</span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-smi">$foursquare</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Foursquare</span>(<span class="pl-smi">$config</span>);</span>
+<span class="pl-s1"><span class="pl-c">// get details about a tip,</span></span>
+<span class="pl-s1"><span class="pl-smi">$response</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>request(<span class="pl-s"><span class="pl-pds">"</span>tips/<span class="pl-smi">$tipId</span><span class="pl-pds">"</span></span>)</span></pre></div>
+
+<p><strong>Searching Venues</strong></p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c">//Laravel</span></span>
+<span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>venues(<span class="pl-smi">$query</span>);</span></pre></div>
+
+<p><strong>Get a single venue</strong></p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>venue(<span class="pl-smi">$venueId</span>);</span></pre></div>
+
+<p><strong>Other venues methods</strong></p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c">// get suggestion @see https://developer.foursquare.com/docs/venues/suggestcompletion</span></span>
+<span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>suggest(<span class="pl-smi">$searchQuery</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>venues(<span class="pl-smi">$searchQuery</span>);</span>
-<span class="pl-s1"></span></pre></div>
+<span class="pl-s1"><span class="pl-c">// get trending @see https://developer.foursquare.com/docs/venues/trending</span></span>
+<span class="pl-s1"><span class="pl-smi">$venues</span> <span class="pl-k">=</span> <span class="pl-c1">Larasquare</span><span class="pl-k">::</span>trending(<span class="pl-smi">$searchQuery</span>);</span></pre></div>
 
 <h2>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
